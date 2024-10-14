@@ -55,7 +55,7 @@ describe('/api/articles/:article_id', () => {
             .then(({ body }) => {
                 expect(body.Article).toHaveProperty('author')
                 expect(body.Article).toHaveProperty('title')
-                expect(body.Article).toHaveProperty('article_id')
+                expect(body.Article.article_id).toBe(1)
                 expect(body.Article).toHaveProperty('body')
                 expect(body.Article).toHaveProperty('topic')
                 expect(body.Article).toHaveProperty('created_at')
@@ -72,4 +72,13 @@ describe('/api/articles/:article_id', () => {
                 expect(body).toEqual({ msg: 'Article not found' })
             })
     })
+
+    it('GET: 400 - should return an error for an invalid article_id (string instead of number)', () => {
+        return request(app)
+        .get('/api/articles/invalid_string')
+        .expect(400)
+        .then(({ body }) => {
+            expect(body).toEqual({ msg: 'Invalid article_id' })
+        })
+        })
 })
