@@ -1,8 +1,13 @@
 # Northcoders News API
 
-For instructions, please head over to [L2C NC News](https://l2c.northcoders.com/courses/be/nc-news).
+To run this project locally, you need to create two environment variable files:
+
+1. Create a file named `.env.development` and add the following line:
+PGDATABASE=your_development_database_name
 
 
+2. Create a file named `.env.test` and add the following line:
+PGDATABASE=your_test_database_name
 
 --- 
 
