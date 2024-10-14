@@ -42,7 +42,34 @@ describe('/api', () => {
         .get('/api')
         .expect(200)
         .then(({ body }) => {
-            expect(body).toEqual(endpoints)
+            expect(body).toEqual({response: endpoints})
         })
+    })
+})
+
+describe('/api/articles/:article_id', () => {
+    it('GET: 200 - should return an article object with the correct properties', () => {
+        return request(app)
+            .get('/api/articles/1')
+            .expect(200)
+            .then(({ body }) => {
+                expect(body.Article).toHaveProperty('author')
+                expect(body.Article).toHaveProperty('title')
+                expect(body.Article).toHaveProperty('article_id')
+                expect(body.Article).toHaveProperty('body')
+                expect(body.Article).toHaveProperty('topic')
+                expect(body.Article).toHaveProperty('created_at')
+                expect(body.Article).toHaveProperty('votes')
+                expect(body.Article).toHaveProperty('article_img_url')
+            })
+    })
+
+    it('GET: 404 - should return an error for an invalid article_id', () => {
+        return request(app)
+            .get('/api/articles/99')
+            .expect(404)
+            .then(({ body }) => {
+                expect(body).toEqual({ msg: 'Article not found' })
+            })
     })
 })
