@@ -42,7 +42,7 @@ describe('/api', () => {
         .get('/api')
         .expect(200)
         .then(({ body }) => {
-            expect(body).toEqual(endpoints)
+            expect(body).toEqual({response: endpoints})
         })
     })
 })
