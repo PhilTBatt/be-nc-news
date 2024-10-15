@@ -2,8 +2,8 @@ const db = require('../db/connection')
 const { fetchArticleById, fetchArticles, fetchArticleComments } = require('../models/articles.models')
 
 exports.getArticleById = (req, res, next) => {
-    const id = req.params.article_id
-    return fetchArticleById(id)
+    const {article_id} = req.params
+    return fetchArticleById(article_id)
     .then(article => res.status(200).send({article}))
     .catch(next)
 }
@@ -15,11 +15,8 @@ exports.getArticles = (req, res, next) => {
 }
 
 exports.getArticleComments = (req, res, next) => {
-    const id = req.params.article_id
-    fetchArticleById(id)
-    .then(() => {
-      return fetchArticleComments(id)
-    })
-    .then(comments => res.status(200).send({comments}))
+    const {article_id} = req.params
+    Promise.all([fetchArticleById(article_id), fetchArticleComments(article_id)])
+    .then(([article, comments]) => res.status(200).send({comments}))
     .catch(next)
 }
