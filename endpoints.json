@@ -25,5 +25,21 @@
         }
       ]
     }
+  },
+  "GET /api/articles/:article_id": {
+    "description": "Should get an article by its ID. Responds with an article object, which should have properties: author, title, article_id, body, topic, created_at, votes, article_img_url, comment_count.",
+    "queries": [],
+    "exampleResponse": {
+      "article": {
+        "author": "weegembump",
+        "title": "Seafood substitutions are increasing",
+        "article_id": 1,
+        "body": "Text from the article..",
+        "topic": "cooking",
+        "created_at": "2018-05-30T15:59:13.341Z",
+        "votes": 0,
+        "article_img_url": "https://example.com/image.jpg"
+      }
+    }
   }
 }
