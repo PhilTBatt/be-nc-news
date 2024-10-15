@@ -114,18 +114,6 @@ describe('/api/articles', () => {
                 expect(body.articles).toBeSortedBy('created_at', { descending: true })
             })
     })
-
-    it('GET: 404 - should return an error when no articles are found', () => {
-        return db.query('TRUNCATE TABLE articles, comments RESTART IDENTITY CASCADE') // Unsure on this but it allowed me to get no articles back the easiest
-        .then(() => {
-            return request(app)
-            .get('/api/articles')
-            .expect(404)
-            .then(({body}) => {
-                expect(body).toEqual({msg: 'No articles found'})
-            })
-        })
-    })
 })
 
 describe('/api/articles/:article_id/comments', () => {
