@@ -4,12 +4,14 @@ const seed = require('../db/seeds/seed')
 const data = require("../db/data/test-data/index")
 const db = require('../db/connection')
 const endpoints = require('../endpoints.json')
+const jestSorted = require('jest-sorted')
+
 
 beforeEach(() => seed(data))
 afterAll(() => db.end())
 
 describe('/api/*', () => {
-    it('404 - returns an error when given an invalid route', () => {
+    it('404 - should return an error when given an invalid route', () => {
         return request(app)
         .get('/api/invalid-route')
         .expect(404)
@@ -37,7 +39,7 @@ describe('/api/topics', () => {
 })
 
 describe('/api', () => {
-    it('GET: 200 - returns a json representation of all the available endpoints', () => {
+    it('GET: 200 - should return a json representation of all the available endpoints', () => {
         return request(app)
         .get('/api')
         .expect(200)
@@ -64,7 +66,7 @@ describe('/api/articles/:article_id', () => {
             })
     })
 
-    it('GET: 404 - should return an error for an invalid article_id', () => {
+    it('GET: 404 - should return an error for an valid but non-existent article_id', () => {
         return request(app)
             .get('/api/articles/99')
             .expect(404)
@@ -73,7 +75,7 @@ describe('/api/articles/:article_id', () => {
             })
     })
 
-    it('GET: 400 - should return an error for an invalid article_id (string instead of number)', () => {
+    it('GET: 400 - should return an error for an invalid article_id)', () => {
         return request(app)
         .get('/api/articles/invalid_string')
         .expect(400)
@@ -81,4 +83,47 @@ describe('/api/articles/:article_id', () => {
             expect(body).toEqual({ msg: 'Invalid article_id' })
         })
         })
+})
+
+describe('/api/articles', () => {
+    it('GET: 200 - should return an array of article objects with the correct properties', () => {
+        return request(app)
+            .get('/api/articles')
+            .expect(200)
+            .then(({ body }) => {
+                expect(Array.isArray(body.Articles)).toBe(true)
+                body.Articles.forEach(article => {
+                    expect(article).toHaveProperty('author')
+                    expect(article).toHaveProperty('title')
+                    expect(article).toHaveProperty('article_id')
+                    expect(article).toHaveProperty('topic')
+                    expect(article).toHaveProperty('created_at')
+                    expect(article).toHaveProperty('votes')
+                    expect(article).toHaveProperty('article_img_url')
+                    expect(article).toHaveProperty('comment_count')
+                    expect(article).not.toHaveProperty('body')
+                })
+            })
+    })
+
+    it('GET: 200 - should return articles sorted by date in descending order', () => {
+        return request(app)
+            .get('/api/articles')
+            .expect(200)
+            .then(({body}) => {
+                expect(body.Articles).toBeSortedBy('created_at', { descending: true })
+            })
+    })
+
+    it('GET: 404 - should return an error when no articles are found', () => {
+        return db.query('TRUNCATE TABLE articles, comments RESTART IDENTITY CASCADE') // Unsure on this but it allowed me to get no articles back the easiest
+        .then(() => {
+            return request(app)
+            .get('/api/articles')
+            .expect(404)
+            .then(({body}) => {
+                expect(body).toEqual({msg: 'No articles found'})
+            })
+        })
+    })
 })
