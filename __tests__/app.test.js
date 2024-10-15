@@ -27,10 +27,10 @@ describe('/api/topics', () => {
         .get('/api/topics')
         .expect(200)
         .then(({body}) => {
-            expect(body).toHaveProperty('Topics')
-            expect(Array.isArray(body.Topics)).toBe(true)
-            expect(body.Topics.length === 3).toBe(true)
-            body.Topics.forEach(topic => {
+            expect(body).toHaveProperty('topics')
+            expect(Array.isArray(body.topics)).toBe(true)
+            expect(body.topics.length === 3).toBe(true)
+            body.topics.forEach(topic => {
                 expect(topic).toHaveProperty('slug')
                 expect(topic).toHaveProperty('description')
             })
@@ -43,8 +43,8 @@ describe('/api', () => {
         return request(app)
         .get('/api')
         .expect(200)
-        .then(({ body }) => {
-            expect(body).toEqual({response: endpoints})
+        .then(({body}) => {
+            expect(body).toEqual({endpoints})
         })
     })
 })
@@ -54,35 +54,35 @@ describe('/api/articles/:article_id', () => {
         return request(app)
             .get('/api/articles/1')
             .expect(200)
-            .then(({ body }) => {
-                expect(body.Article).toHaveProperty('author')
-                expect(body.Article).toHaveProperty('title')
-                expect(body.Article.article_id).toBe(1)
-                expect(body.Article).toHaveProperty('body')
-                expect(body.Article).toHaveProperty('topic')
-                expect(body.Article).toHaveProperty('created_at')
-                expect(body.Article).toHaveProperty('votes')
-                expect(body.Article).toHaveProperty('article_img_url')
+            .then(({body}) => {
+                expect(body.article).toHaveProperty('author')
+                expect(body.article).toHaveProperty('title')
+                expect(body.article.article_id).toBe(1)
+                expect(body.article).toHaveProperty('body')
+                expect(body.article).toHaveProperty('topic')
+                expect(body.article).toHaveProperty('created_at')
+                expect(body.article).toHaveProperty('votes')
+                expect(body.article).toHaveProperty('article_img_url')
             })
     })
 
-    it('GET: 404 - should return an error for an valid but non-existent article_id', () => {
+    it('GET: 404 - should return an error for a valid but non-existent article_id', () => {
         return request(app)
             .get('/api/articles/99')
             .expect(404)
-            .then(({ body }) => {
+            .then(({body}) => {
                 expect(body).toEqual({ msg: 'Article not found' })
             })
     })
 
-    it('GET: 400 - should return an error for an invalid article_id)', () => {
+    it('GET: 400 - should return an error for an invalid article_id', () => {
         return request(app)
         .get('/api/articles/invalid_string')
         .expect(400)
-        .then(({ body }) => {
+        .then(({body}) => {
             expect(body).toEqual({ msg: 'Invalid article_id' })
         })
-        })
+    })
 })
 
 describe('/api/articles', () => {
@@ -90,9 +90,9 @@ describe('/api/articles', () => {
         return request(app)
             .get('/api/articles')
             .expect(200)
-            .then(({ body }) => {
-                expect(Array.isArray(body.Articles)).toBe(true)
-                body.Articles.forEach(article => {
+            .then(({body}) => {
+                expect(Array.isArray(body.articles)).toBe(true)
+                body.articles.forEach(article => {
                     expect(article).toHaveProperty('author')
                     expect(article).toHaveProperty('title')
                     expect(article).toHaveProperty('article_id')
@@ -111,7 +111,7 @@ describe('/api/articles', () => {
             .get('/api/articles')
             .expect(200)
             .then(({body}) => {
-                expect(body.Articles).toBeSortedBy('created_at', { descending: true })
+                expect(body.articles).toBeSortedBy('created_at', { descending: true })
             })
     })
 
@@ -125,5 +125,52 @@ describe('/api/articles', () => {
                 expect(body).toEqual({msg: 'No articles found'})
             })
         })
+    })
+})
+
+describe('/api/articles/:article_id/comments', () => {
+    it('GET: 200 - should return an array of comments for the given article_id', () => {
+        return request(app)
+        .get('/api/articles/1/comments')
+        .expect(200)
+        .then(({body}) => {
+            expect(body.comments).toBeInstanceOf(Array)
+            expect(body.comments.length).toBe(11)
+            body.comments.forEach(comment => {
+                expect(comment).toHaveProperty('comment_id')
+                expect(comment).toHaveProperty('votes')
+                expect(comment).toHaveProperty('created_at')
+                expect(comment).toHaveProperty('author')
+                expect(comment).toHaveProperty('body')
+                expect(comment.article_id).toBe(1)
+            })
+        })
+    })
+
+    it('GET: 200 - should respond with an empty array when there are no comments for an article', () => {
+        return request(app)
+        .get('/api/articles/2/comments')
+        .expect(200)
+        .then(({body}) => {
+            expect(body).toEqual({comments : []})
+        })
+    })
+
+    it('GET: 200 - should return the most recent comments first', () => {
+        return request(app)
+        .get('/api/articles/1/comments')
+        .expect(200)
+        .then(({body}) => {
+                expect(body.comments).toBeSortedBy('created_at', {descending: true})
+        })
+    })
+
+    it('GET: 404 - should respond with an error for a valid but non-existent article_id', () => {
+        return request(app)
+            .get('/api/articles/999/comments')
+            .expect(404)
+            .then(({body}) => {
+                expect(body).toEqual({msg: 'Article not found'})
+            })
     })
 })

@@ -2,5 +2,5 @@ const { fetchTopics } = require("../models/topics.model");
 
 exports.getTopics = (req, res) => {
     fetchTopics()
-    .then(topics => res.status(200).send({'Topics': topics}))
+    .then(topics => res.status(200).send({topics}))
 }
