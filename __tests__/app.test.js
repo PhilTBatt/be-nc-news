@@ -49,7 +49,7 @@ describe('/api', () => {
     })
 })
 
-describe('/api/articles/:article_id', () => {
+describe('GET /api/articles/:article_id', () => {
     it('GET: 200 - should return an article object with the correct properties', () => {
         return request(app)
         .get('/api/articles/1')
@@ -78,6 +78,63 @@ describe('/api/articles/:article_id', () => {
     it('GET: 404 - should return an error for a valid but non-existent article_id', () => {
         return request(app)
         .get('/api/articles/99')
+        .expect(404)
+        .then(({body}) => {
+            expect(body).toEqual({msg: 'Article not found'})
+        })
+    })
+})
+
+describe('PATCH /api/articles/:article_id', () => {
+    it('PATCH: 200 - should update an article by article_id and return the updated article', () => {
+        const voteUpdate = {inc_votes: 2}
+        return request(app)
+        .patch('/api/articles/1')
+        .send(voteUpdate)
+        .expect(200)
+        .then(({body: {article}}) => {
+            expect(article).toHaveProperty('article_id', 1)
+            expect(article).toHaveProperty('votes', 102)
+        })
+    })
+
+    it('PATCH: 400 - should return an error when given an invalid article_id', () => {
+        const voteUpdate = {inc_votes: 1}
+        return request(app)
+        .patch('/api/articles/invalid_id')
+        .send(voteUpdate)
+        .expect(400)
+        .then(({body}) => {
+            expect(body).toEqual({msg: 'Invalid article_id'})
+        })
+    })
+
+    it('PATCH: 400 - should return an error when given an invalid article_id', () => {
+        const voteUpdate = {inc_votes: 'one'}
+        return request(app)
+        .patch('/api/articles/invalid_id')
+        .send(voteUpdate)
+        .expect(400)
+        .then(({body}) => {
+            expect(body).toEqual({msg: 'Invalid vote'})
+        })
+    })
+
+    it('PATCH: 400 - should return an error when inc_votes is missing', () => {
+        return request(app)
+        .patch('/api/articles/1')
+        .send({})
+        .expect(400)
+        .then(({body}) => {
+            expect(body).toEqual({msg: 'Missing required fields'})
+        })
+    })
+
+    it('PATCH: 404 - should return an error when given a valid but non-existent article_id', () => {
+        const voteUpdate = {inc_votes: 1}
+        return request(app)
+        .patch('/api/articles/999')
+        .send(voteUpdate)
         .expect(404)
         .then(({body}) => {
             expect(body).toEqual({msg: 'Article not found'})
@@ -200,9 +257,11 @@ describe('POST /api/articles/:article_id/comments', () => {
         })
     })
 
-    test('POST: 400 - should respond with an error when given a invalid article_id', () => {
+    it('POST: 400 - should respond with an error when given a invalid article_id', () => {
+        const comment = {username: 'butter_bridge', body: 'body'}
         return request(app)
-        .get('/api/articles/not-an-id/comments')
+        .post('/api/articles/id/comments')
+        .send(comment)
         .expect(400)
         .then(({body}) => {
             expect(body).toEqual({msg: 'Invalid article_id'})
@@ -232,59 +291,28 @@ describe('POST /api/articles/:article_id/comments', () => {
     })
 })
 
-describe('/api/articles/:article_id', () => {
-    it('PATCH: 200 - should update an article by article_id and return the updated article', () => {
-        const voteUpdate = {inc_votes: 2}
+describe('/api/comments/:comment_id', () => {
+    it('DELETE: 204 - should delete the comment by comment_id', () => {
         return request(app)
-        .patch('/api/articles/1')
-        .send(voteUpdate)
-        .expect(200)
-        .then(({body: {article}}) => {
-            expect(article).toHaveProperty('article_id', 1)
-            expect(article).toHaveProperty('votes', 102)
-        })
+        .delete('/api/comments/1')
+        .expect(204)
     })
 
-    it('PATCH: 400 - should return an error when given an invalid article_id', () => {
-        const voteUpdate = {inc_votes: 1}
+    it('DELETE: 400 - should return an error for an invalid comment_id', () => {
         return request(app)
-        .patch('/api/articles/invalid_id')
-        .send(voteUpdate)
+        .delete('/api/comments/invalid_id')
         .expect(400)
         .then(({body}) => {
-            expect(body).toEqual({msg: 'Invalid article_id'})
+            expect(body).toEqual({msg: 'Invalid comment_id'})
         })
     })
 
-    it('PATCH: 400 - should return an error when given an invalid article_id', () => {
-        const voteUpdate = {inc_votes: 'one'}
+    it('DELETE: 404 - should return an error for a non-existent comment_id', () => {
         return request(app)
-        .patch('/api/articles/invalid_id')
-        .send(voteUpdate)
-        .expect(400)
-        .then(({body}) => {
-            expect(body).toEqual({msg: 'Invalid vote'})
-        })
-    })
-
-    it('PATCH: 400 - should return an error when inc_votes is missing', () => {
-        return request(app)
-        .patch('/api/articles/1')
-        .send({})
-        .expect(400)
-        .then(({body}) => {
-            expect(body).toEqual({msg: 'Missing required fields'})
-        })
-    })
-
-    it('PATCH: 404 - should return an error when given a valid but non-existent article_id', () => {
-        const voteUpdate = {inc_votes: 1}
-        return request(app)
-        .patch('/api/articles/999')
-        .send(voteUpdate)
+        .delete('/api/comments/999')
         .expect(404)
         .then(({body}) => {
-            expect(body).toEqual({msg: 'Article not found'})
+            expect(body).toEqual({msg: 'Comment not found'})
         })
     })
 })
