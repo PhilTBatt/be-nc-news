@@ -16,3 +16,12 @@ exports.insertArticleComment = (id, comment) => {
         [comment.body, 0, comment.username, id])
     .then(comments => comments.rows[0])
 }
+
+exports.removeComment = (id) => {
+    return db.query('DELETE FROM comments WHERE comment_id = $1', [id])
+    .then(result => {
+        if (result.rowCount === 0) {
+            return Promise.reject({status: 404, msg: 'Comment not found'})
+        }}
+    )
+}

@@ -4,7 +4,7 @@ exports.getArticleById = (req, res, next) => {
     const {article_id} = req.params
     return fetchArticleById(article_id)
     .then(article => res.status(200).send({article}))
-    .catch(next)
+    .catch(err => (next({...err, context: 'article'})))
 }
 
 exports.getArticles = (req, res, next) => {
@@ -18,5 +18,5 @@ exports.patchArticleVotes = (req, res, next) => {
     const vote = req.body.inc_votes
     return Promise.all([fetchArticleById(article_id), updateArticleVotes(article_id, vote)])
     .then(([articleNo, article]) => res.status(200).send({article}))
-    .catch(next)
+    .catch(err => (next({...err, context: 'article'})))
 }
