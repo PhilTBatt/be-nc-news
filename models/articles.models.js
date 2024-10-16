@@ -18,3 +18,10 @@ exports.fetchArticles = () => {
         return articles.rows
     })
 }
+
+exports.updateArticleVotes = (id, vote) => {
+    if (!vote) {return Promise.reject({status: 400, msg: 'Missing required fields'})}
+    if (isNaN(vote)) {return Promise.reject({status: 400, msg: 'Invalid vote'})}
+    return db.query('UPDATE articles SET votes = votes + $1 WHERE article_id = $2 RETURNING *', [vote, id])
+    .then(article => article.rows[0])
+}
