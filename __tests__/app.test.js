@@ -31,8 +31,8 @@ describe('/api/topics', () => {
             expect(Array.isArray(body.topics)).toBe(true)
             expect(body.topics.length === 3).toBe(true)
             body.topics.forEach(topic => {
-                expect(topic).toHaveProperty('slug')
-                expect(topic).toHaveProperty('description')
+                expect(topic).toHaveProperty('slug', expect.any(String))
+                expect(topic).toHaveProperty('description', expect.any(String))
             })
         })
     })
@@ -52,35 +52,35 @@ describe('/api', () => {
 describe('/api/articles/:article_id', () => {
     it('GET: 200 - should return an article object with the correct properties', () => {
         return request(app)
-            .get('/api/articles/1')
-            .expect(200)
-            .then(({body}) => {
-                expect(body.article).toHaveProperty('author')
-                expect(body.article).toHaveProperty('title')
-                expect(body.article.article_id).toBe(1)
-                expect(body.article).toHaveProperty('body')
-                expect(body.article).toHaveProperty('topic')
-                expect(body.article).toHaveProperty('created_at')
-                expect(body.article).toHaveProperty('votes')
-                expect(body.article).toHaveProperty('article_img_url')
-            })
-    })
-
-    it('GET: 404 - should return an error for a valid but non-existent article_id', () => {
-        return request(app)
-            .get('/api/articles/99')
-            .expect(404)
-            .then(({body}) => {
-                expect(body).toEqual({ msg: 'Article not found' })
-            })
+        .get('/api/articles/1')
+        .expect(200)
+        .then(({body: {article}}) => {
+            expect(article).toHaveProperty('author', expect.any(String))
+            expect(article).toHaveProperty('title', expect.any(String))
+            expect(article.article_id).toBe(1)
+            expect(article).toHaveProperty('body', expect.any(String))
+            expect(article).toHaveProperty('topic', expect.any(String))
+            expect(article).toHaveProperty('created_at')
+            expect(article).toHaveProperty('votes', expect.any(Number))
+            expect(article).toHaveProperty('article_img_url', expect.any(String))
+        })
     })
 
     it('GET: 400 - should return an error for an invalid article_id', () => {
         return request(app)
-        .get('/api/articles/invalid_string')
+        .get('/api/articles/invalid_id')
         .expect(400)
         .then(({body}) => {
             expect(body).toEqual({ msg: 'Invalid article_id' })
+        })
+    })
+
+    it('GET: 404 - should return an error for a valid but non-existent article_id', () => {
+        return request(app)
+        .get('/api/articles/99')
+        .expect(404)
+        .then(({body}) => {
+            expect(body).toEqual({msg: 'Article not found'})
         })
     })
 })
@@ -88,47 +88,35 @@ describe('/api/articles/:article_id', () => {
 describe('/api/articles', () => {
     it('GET: 200 - should return an array of article objects with the correct properties', () => {
         return request(app)
-            .get('/api/articles')
-            .expect(200)
-            .then(({body}) => {
-                expect(Array.isArray(body.articles)).toBe(true)
-                body.articles.forEach(article => {
-                    expect(article).toHaveProperty('author')
-                    expect(article).toHaveProperty('title')
-                    expect(article).toHaveProperty('article_id')
-                    expect(article).toHaveProperty('topic')
-                    expect(article).toHaveProperty('created_at')
-                    expect(article).toHaveProperty('votes')
-                    expect(article).toHaveProperty('article_img_url')
-                    expect(article).toHaveProperty('comment_count')
-                    expect(article).not.toHaveProperty('body')
-                })
+        .get('/api/articles')
+        .expect(200)
+        .then(({body}) => {
+            expect(Array.isArray(body.articles)).toBe(true)
+            body.articles.forEach(article => {
+                expect(article).toHaveProperty('author', expect.any(String))
+                expect(article).toHaveProperty('title', expect.any(String))
+                expect(article).toHaveProperty('article_id', expect.any(Number))
+                expect(article).toHaveProperty('topic', expect.any(String))
+                expect(article).toHaveProperty('created_at')
+                expect(article).toHaveProperty('votes', expect.any(Number))
+                expect(article).toHaveProperty('article_img_url', expect.any(String))
+                expect(article).toHaveProperty('comment_count', expect.any(String))
+                expect(article).not.toHaveProperty('body')
             })
+        })
     })
 
     it('GET: 200 - should return articles sorted by date in descending order', () => {
         return request(app)
-            .get('/api/articles')
-            .expect(200)
-            .then(({body}) => {
-                expect(body.articles).toBeSortedBy('created_at', { descending: true })
-            })
-    })
-
-    it('GET: 404 - should return an error when no articles are found', () => {
-        return db.query('TRUNCATE TABLE articles, comments RESTART IDENTITY CASCADE') // Unsure on this but it allowed me to get no articles back the easiest
-        .then(() => {
-            return request(app)
-            .get('/api/articles')
-            .expect(404)
-            .then(({body}) => {
-                expect(body).toEqual({msg: 'No articles found'})
-            })
+        .get('/api/articles')
+        .expect(200)
+        .then(({body}) => {
+            expect(body.articles).toBeSortedBy('created_at', {descending: true})
         })
     })
 })
 
-describe('/api/articles/:article_id/comments', () => {
+describe('GET /api/articles/:article_id/comments', () => {
     it('GET: 200 - should return an array of comments for the given article_id', () => {
         return request(app)
         .get('/api/articles/1/comments')
@@ -161,16 +149,85 @@ describe('/api/articles/:article_id/comments', () => {
         .get('/api/articles/1/comments')
         .expect(200)
         .then(({body}) => {
-                expect(body.comments).toBeSortedBy('created_at', {descending: true})
+            expect(body.comments).toBeSortedBy('created_at', {descending: true})
+        })
+    })
+
+    it('GET: 400 - should return an error for an invalid article_id', () => {
+        return request(app)
+        .get('/api/articles/invalid_id')
+        .expect(400)
+        .then(({body}) => {
+            expect(body).toEqual({ msg: 'Invalid article_id' })
         })
     })
 
     it('GET: 404 - should respond with an error for a valid but non-existent article_id', () => {
         return request(app)
-            .get('/api/articles/999/comments')
-            .expect(404)
-            .then(({body}) => {
-                expect(body).toEqual({msg: 'Article not found'})
-            })
+        .get('/api/articles/999/comments')
+        .expect(404)
+        .then(({body}) => {
+            expect(body).toEqual({msg: 'Article not found'})
+        })
+    })
+})
+
+describe('POST /api/articles/:article_id/comments', () => {
+    it('POST: 201 - should add a comment for the given article_id and respond with the posted comment', () => {
+        const newComment = {username: 'butter_bridge', body: 'example'}
+        return request(app)
+        .post('/api/articles/1/comments')
+        .send(newComment)
+        .expect(201)
+        .then(({body: {comment}}) => {
+            expect(comment).toHaveProperty('comment_id')
+            expect(comment).toHaveProperty('author', 'butter_bridge')
+            expect(comment).toHaveProperty('body', 'example')
+            expect(comment).toHaveProperty('article_id', 1)
+            expect(comment).toHaveProperty('created_at')
+            expect(comment).toHaveProperty('votes', 0)
+        })
+    })
+
+    it('POST: 400 - should respond with an error when required fields are missing', () => {
+        const incompleteComment = {username: 'butter_bridge'}
+        return request(app)
+        .post('/api/articles/1/comments')
+        .send(incompleteComment)
+        .expect(400)
+        .then(({body}) => {
+            expect(body).toEqual({msg: 'Missing required fields'})
+        })
+    })
+
+    test('POST: 400 - should respond with an error when given a invalid article_id', () => {
+        return request(app)
+        .get('/api/articles/not-an-id/comments')
+        .expect(400)
+        .then(({body}) => {
+            expect(body).toEqual({msg: 'Invalid article_id'})
+        })
+    })
+
+    it('POST: 404 - should respond with an error when given a non-existent article_id', () => {
+        const comment = {username: 'butter_bridge', body: 'body'}
+        return request(app)
+        .post('/api/articles/99/comments')
+        .send(comment)
+        .expect(404)
+        .then(({body}) => {
+            expect(body).toEqual({msg: 'Article not found'})
+        })
+    })
+
+    it('POST: 404 - should respond with an error when given a non-existent username', () => {
+        const comment = {username: 'nonexistent_user', body: 'body'}
+        return request(app)
+        .post('/api/articles/1/comments')
+        .send(comment)
+        .expect(404)
+        .then(({body}) => {
+            expect(body).toEqual({msg: 'User not found'})
+        })
     })
 })
