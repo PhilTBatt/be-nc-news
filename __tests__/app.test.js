@@ -157,19 +157,129 @@ describe('/api/articles', () => {
                 expect(article).toHaveProperty('created_at')
                 expect(article).toHaveProperty('votes', expect.any(Number))
                 expect(article).toHaveProperty('article_img_url', expect.any(String))
-                expect(article).toHaveProperty('comment_count', expect.any(String))
+                expect(article).toHaveProperty('comment_count', expect.any(Number))
                 expect(article).not.toHaveProperty('body')
             })
         })
     })
 
-    it('GET: 200 - should return articles sorted by date in descending order', () => {
-        return request(app)
-        .get('/api/articles')
+    it('GET: 200 - returns articles sorted by created_at (default) in descending order (default)', () => {
+        return request(app).get('/api/articles')
         .expect(200)
         .then(({body}) => {
+            expect(Array.isArray(body.articles)).toBe(true)
             expect(body.articles).toBeSortedBy('created_at', {descending: true})
         })
+    })
+
+    it('GET: 200 - returns articles sorted by specified column', () => {
+        return request(app).get('/api/articles?sort_by=article_id')
+        .expect(200)
+        .then(({body}) => {
+            expect(Array.isArray(body.articles)).toBe(true)
+            expect(body.articles).toBeSortedBy('article_id', {descending: true})
+    
+            return request(app).get('/api/articles?sort_by=author')
+        })
+        .then(({body}) => {
+            expect(Array.isArray(body.articles)).toBe(true)
+            expect(body.articles).toBeSortedBy('author', {descending: true})
+    
+            return request(app).get('/api/articles?sort_by=title')
+        })
+        .then(({body}) => {
+            expect(Array.isArray(body.articles)).toBe(true)
+            expect(body.articles).toBeSortedBy('title', {descending: true})
+    
+            return request(app).get('/api/articles?sort_by=topic')
+        })
+        .then(({body}) => {
+            expect(Array.isArray(body.articles)).toBe(true)
+            expect(body.articles).toBeSortedBy('topic', {descending: true})
+    
+            return request(app).get('/api/articles?sort_by=votes')
+        })
+        .then(({body}) => {
+            expect(Array.isArray(body.articles)).toBe(true)
+            expect(body.articles).toBeSortedBy('votes', {descending: true})
+    
+            return request(app).get('/api/articles?sort_by=article_img_url')
+        })
+        .then(({body}) => {
+            expect(Array.isArray(body.articles)).toBe(true)
+            expect(body.articles).toBeSortedBy('article_img_url', {descending: true})
+    
+            return request(app).get('/api/articles?sort_by=comment_count')
+        })
+        .then(({body}) => {
+            console.log(body)
+            expect(Array.isArray(body.articles)).toBe(true)
+            expect(body.articles).toBeSortedBy('comment_count', {descending: true})
+        })
+    })
+    
+    it('GET: 200 - returns articles sorted by specified column in ascending order', () => {
+        return request(app).get('/api/articles?sort_by=article_id&order=ASC')
+        .expect(200)
+        .then(({body}) => {
+            expect(Array.isArray(body.articles)).toBe(true)
+            expect(body.articles).toBeSortedBy('article_id', {descending: false})
+    
+            return request(app).get('/api/articles?sort_by=author&order=ASC')
+        })
+        .then(({body}) => {
+            expect(Array.isArray(body.articles)).toBe(true)
+            expect(body.articles).toBeSortedBy('author', {descending: false})
+    
+            return request(app).get('/api/articles?sort_by=title&order=ASC')
+        })
+        .then(({body}) => {
+            expect(Array.isArray(body.articles)).toBe(true)
+            expect(body.articles).toBeSortedBy('title', {descending: false})
+    
+            return request(app).get('/api/articles?sort_by=topic&order=ASC')
+        })
+        .then(({body}) => {
+            expect(Array.isArray(body.articles)).toBe(true)
+            expect(body.articles).toBeSortedBy('topic', {descending: false})
+    
+            return request(app).get('/api/articles?sort_by=votes&order=ASC')
+        })
+        .then(({body}) => {
+            expect(Array.isArray(body.articles)).toBe(true)
+            expect(body.articles).toBeSortedBy('votes', {descending: false})
+    
+            return request(app).get('/api/articles?sort_by=article_img_url&order=ASC')
+        })
+        .then(({body}) => {
+            expect(Array.isArray(body.articles)).toBe(true)
+            expect(body.articles).toBeSortedBy('article_img_url', {descending: false})
+    
+            return request(app).get('/api/articles?sort_by=comment_count&order=ASC')
+        })
+        .then(({body}) => {
+            console.log(body)
+            expect(Array.isArray(body.articles)).toBe(true)
+            expect(body.articles).toBeSortedBy('comment_count', {descending: false})
+        })
+    })
+
+    it('GET: 400 - should return an error for an invalid sort_by column', () => {
+        return request(app)
+            .get('/api/articles?sort_by=invalid_column')
+            .expect(400)
+            .then(({ body }) => {
+                expect(body).toEqual({msg: 'Invalid sort_by query'})
+            })
+    })
+
+    it('GET: 400 - should return an error for an invalid order value', () => {
+        return request(app)
+            .get('/api/articles?order=invalid_order')
+            .expect(400)
+            .then(({ body }) => {
+                expect(body).toEqual({msg: 'Invalid order query'})
+            })
     })
 })
 
@@ -323,7 +433,6 @@ describe('GET /api/users', () => {
         .get('/api/users')
         .expect(200)
         .then(({body}) => {
-            console.log(body.users)
             expect(Array.isArray(body.users)).toBe(true)
             body.users.forEach(user => {
                 expect(user).toHaveProperty('username')

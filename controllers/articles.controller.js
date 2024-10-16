@@ -8,7 +8,8 @@ exports.getArticleById = (req, res, next) => {
 }
 
 exports.getArticles = (req, res, next) => {
-    return fetchArticles()
+    const {sort_by: sortBy, order} = req.query
+    return fetchArticles(sortBy, order)
     .then(articles => res.status(200).send({articles}))
     .catch(next)
 }
