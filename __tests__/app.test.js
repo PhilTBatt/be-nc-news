@@ -316,3 +316,20 @@ describe('/api/comments/:comment_id', () => {
         })
     })
 })
+
+describe('GET /api/users', () => {
+    it('GET: 200 - should return an array of user objects', () => {
+        return request(app)
+        .get('/api/users')
+        .expect(200)
+        .then(({body}) => {
+            console.log(body.users)
+            expect(Array.isArray(body.users)).toBe(true)
+            body.users.forEach(user => {
+                expect(user).toHaveProperty('username')
+                expect(user).toHaveProperty('name')
+                expect(user).toHaveProperty('avatar_url')
+            })
+        })
+    })
+})
