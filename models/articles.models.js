@@ -10,10 +10,18 @@ exports.fetchArticleById = (id) => {
     })
 }
 
-exports.fetchArticles = () => {
+exports.fetchArticles = (sortBy = 'created_at', order = 'DESC') => {
+    const validColumns = ['article_id', 'title', 'author', 'topic', 'created_at', 'votes', 'article_img_url', 'comment_count']
+    const validOrders = ['ASC', 'DESC']
+    if (!validColumns.includes(sortBy)) {
+        return Promise.reject({status: 400, msg: 'Invalid sort_by query'})
+    }
+    if (!validOrders.includes(order)) {
+        return Promise.reject({status: 400, msg: 'Invalid order query'})
+    }
     return db.query(`SELECT articles.article_id, articles.title, articles.author, articles.topic, articles.created_at,
-        articles.votes, articles.article_img_url, COUNT(comments.article_id) AS comment_count FROM articles LEFT JOIN comments
-        ON comments.article_id = articles.article_id GROUP BY articles.article_id  ORDER BY articles.created_at DESC`)
+        articles.votes, articles.article_img_url, COUNT(comments.article_id)::int AS comment_count FROM articles LEFT JOIN comments
+        ON comments.article_id = articles.article_id GROUP BY articles.article_id  ORDER BY ${sortBy} ${order}`)
     .then(articles => {
         return articles.rows
     })
