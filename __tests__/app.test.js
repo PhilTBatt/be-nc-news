@@ -26,11 +26,10 @@ describe('/api/topics', () => {
         return request(app)
         .get('/api/topics')
         .expect(200)
-        .then(({body}) => {
-            expect(body).toHaveProperty('topics')
-            expect(Array.isArray(body.topics)).toBe(true)
-            expect(body.topics.length === 3).toBe(true)
-            body.topics.forEach(topic => {
+        .then(({body: {topics}}) => {
+            expect(Array.isArray(topics)).toBe(true)
+            expect(topics.length === 3).toBe(true)
+            topics.forEach(topic => {
                 expect(topic).toHaveProperty('slug', expect.any(String))
                 expect(topic).toHaveProperty('description', expect.any(String))
             })
@@ -155,10 +154,10 @@ describe('/api/articles', () => {
         return request(app)
         .get('/api/articles')
         .expect(200)
-        .then(({body}) => {
-            expect(Array.isArray(body.articles)).toBe(true)
-            expect(body.articles.length).toBe(13)
-            body.articles.forEach(article => {
+        .then(({body: {articles}}) => {
+            expect(Array.isArray(articles)).toBe(true)
+            expect(articles.length).toBe(13)
+            articles.forEach(article => {
                 expect(article).toHaveProperty('author', expect.any(String))
                 expect(article).toHaveProperty('title', expect.any(String))
                 expect(article).toHaveProperty('article_id', expect.any(Number))
@@ -175,39 +174,39 @@ describe('/api/articles', () => {
     it('GET: 200 - returns articles sorted by created_at (default) in descending order (default)', () => {
         return request(app).get('/api/articles')
         .expect(200)
-        .then(({body}) => {
-            expect(Array.isArray(body.articles)).toBe(true)
-            expect(body.articles).toBeSortedBy('created_at', {descending: true})
+        .then(({body: {articles}}) => {
+            expect(Array.isArray(articles)).toBe(true)
+            expect(articles).toBeSortedBy('created_at', {descending: true})
         })
     })
 
     it('GET: 200 - returns articles sorted by specified column', () => {
         return request(app).get('/api/articles?sort_by=article_id')
         .expect(200)
-        .then(({body}) => {
-            expect(Array.isArray(body.articles)).toBe(true)
-            expect(body.articles).toBeSortedBy('article_id', {descending: true})
+        .then(({body: {articles}}) => {
+            expect(Array.isArray(articles)).toBe(true)
+            expect(articles).toBeSortedBy('article_id', {descending: true})
     
             return request(app).get('/api/articles?sort_by=author')
         })
-        .then(({body}) => {
-            expect(Array.isArray(body.articles)).toBe(true)
-            expect(body.articles).toBeSortedBy('author', {descending: true})
+        .then(({body: {articles}}) => {
+            expect(Array.isArray(articles)).toBe(true)
+            expect(articles).toBeSortedBy('author', {descending: true})
         })
     })
     
     it('GET: 200 - returns articles sorted by specified column in ascending order', () => {
         return request(app).get('/api/articles?sort_by=article_id&order=ASC')
         .expect(200)
-        .then(({body}) => {
-            expect(Array.isArray(body.articles)).toBe(true)
-            expect(body.articles).toBeSortedBy('article_id', {descending: false})
+        .then(({body: {articles}}) => {
+            expect(Array.isArray(articles)).toBe(true)
+            expect(articles).toBeSortedBy('article_id', {descending: false})
     
             return request(app).get('/api/articles?sort_by=author&order=ASC')
         })
-        .then(({body}) => {
-            expect(Array.isArray(body.articles)).toBe(true)
-            expect(body.articles).toBeSortedBy('author', {descending: false})
+        .then(({body: {articles}}) => {
+            expect(Array.isArray(articles)).toBe(true)
+            expect(articles).toBeSortedBy('author', {descending: false})
         })
     })
 
@@ -215,10 +214,10 @@ describe('/api/articles', () => {
         return request(app)
         .get('/api/articles?topic=mitch')
         .expect(200)
-        .then(({body}) => {
-            expect(Array.isArray(body.articles)).toBe(true)
-            body.articles.forEach(article => {
-                    expect(article.topic).toBe('mitch')
+        .then(({body: {articles}}) => {
+            expect(Array.isArray(articles)).toBe(true)
+            articles.forEach(article => {
+                expect(article.topic).toBe('mitch')
             })
         })
     })
@@ -256,10 +255,10 @@ describe('GET /api/articles/:article_id/comments', () => {
         return request(app)
         .get('/api/articles/1/comments')
         .expect(200)
-        .then(({body}) => {
-            expect(body.comments).toBeInstanceOf(Array)
-            expect(body.comments.length).toBe(11)
-            body.comments.forEach(comment => {
+        .then(({body: {comments}}) => {
+            expect(comments).toBeInstanceOf(Array)
+            expect(comments.length).toBe(11)
+            comments.forEach(comment => {
                 expect(comment).toHaveProperty('comment_id')
                 expect(comment).toHaveProperty('votes')
                 expect(comment).toHaveProperty('created_at')
@@ -274,8 +273,8 @@ describe('GET /api/articles/:article_id/comments', () => {
         return request(app)
         .get('/api/articles/2/comments')
         .expect(200)
-        .then(({body}) => {
-            expect(body).toEqual({comments : []})
+        .then(({body: {comments}}) => {
+            expect(comments).toEqual([])
         })
     })
 
@@ -283,8 +282,8 @@ describe('GET /api/articles/:article_id/comments', () => {
         return request(app)
         .get('/api/articles/1/comments')
         .expect(200)
-        .then(({body}) => {
-            expect(body.comments).toBeSortedBy('created_at', {descending: true})
+        .then(({body: {comments}}) => {
+            expect(comments).toBeSortedBy('created_at', {descending: true})
         })
     })
 
@@ -408,6 +407,28 @@ describe('GET /api/users', () => {
                 expect(user).toHaveProperty('name')
                 expect(user).toHaveProperty('avatar_url')
             })
+        })
+    })
+})
+
+describe('GET /api/users/:username', () => {
+    test('200: should respond with the user object containing username, avatar_url, and name properties', () => {
+        return request(app)
+        .get('/api/users/butter_bridge')
+        .expect(200)
+        .then(({body: {user}}) => {
+            expect(user).toHaveProperty('username')
+            expect(user).toHaveProperty('name')
+            expect(user).toHaveProperty('avatar_url')
+        })
+    })
+  
+    test('404: should respond with an error when username does not exist', () => {
+        return request(app)
+        .get('/api/users/non_existent_user')
+        .expect(404)
+        .then(({body}) => {
+            expect(body).toEqual({msg: 'User not found'})
         })
     })
 })
