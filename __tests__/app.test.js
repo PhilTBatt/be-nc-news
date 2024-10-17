@@ -258,9 +258,20 @@ describe('/api/articles', () => {
             return request(app).get('/api/articles?sort_by=comment_count&order=ASC')
         })
         .then(({body}) => {
-            console.log(body)
             expect(Array.isArray(body.articles)).toBe(true)
             expect(body.articles).toBeSortedBy('comment_count', {descending: false})
+        })
+    })
+
+    it('GET: 200 - should return articles filtered by topic', () => {
+        return request(app)
+        .get('/api/articles?topic=mitch')
+        .expect(200)
+        .then(({body}) => {
+            expect(Array.isArray(body.articles)).toBe(true)
+            body.articles.forEach(article => {
+                    expect(article.topic).toBe('mitch')
+            })
         })
     })
 
@@ -268,7 +279,7 @@ describe('/api/articles', () => {
         return request(app)
             .get('/api/articles?sort_by=invalid_column')
             .expect(400)
-            .then(({ body }) => {
+            .then(({body}) => {
                 expect(body).toEqual({msg: 'Invalid sort_by query'})
             })
     })
@@ -277,9 +288,18 @@ describe('/api/articles', () => {
         return request(app)
             .get('/api/articles?order=invalid_order')
             .expect(400)
-            .then(({ body }) => {
+            .then(({body}) => {
                 expect(body).toEqual({msg: 'Invalid order query'})
             })
+    })
+
+    it('GET: 404 - should return an error for a non-existent topic', () => {
+        return request(app)
+        .get('/api/articles?topic=nonexistent_topic')
+        .expect(404)
+        .then(({body}) => {
+            expect(body).toEqual({msg: 'Topic not found'})
+        })
     })
 })
 
