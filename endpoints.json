@@ -26,6 +26,30 @@
       ]
     }
   },
+  "POST /api/articles": {
+    "description": "adds a new article",
+    "queries": [],
+    "requestBody": {
+      "author": "butter_bridge",
+      "title": "New Article Title",
+      "body": "This is the body of the new article",
+      "topic": "cooking",
+      "article_img_url": "https://example.com/image.jpg"
+    },
+    "exampleResponse": {
+      "article": {
+        "article_id": 4,
+        "author": "butter_bridge",
+        "title": "New Article Title",
+        "body": "This is the body of the new article",
+        "topic": "cooking",
+        "created_at": "2023-10-17T15:59:13.341Z",
+        "votes": 0,
+        "comment_count": 0,
+        "article_img_url": "https://example.com/image.jpg"
+      }
+    }
+  },
   "GET /api/articles/:article_id": {
     "description": "serves an article by its ID",
     "queries": [],
@@ -101,6 +125,23 @@
     "exampleResponse": {
       "status": 204,
       "msg": "No Content"
+    }
+  },
+  "PATCH /api/comments/:comment_id": {
+    "description": "updates a comment's votes by comment_id",
+    "queries": [],
+    "requestBody": {
+      "inc_votes": 1
+    },
+    "exampleResponse": {
+      "comment": {
+        "comment_id": 1,
+        "author": "butter_bridge",
+        "body": "This is a comment",
+        "article_id": 1,
+        "created_at": "2023-05-15T15:59:13.341Z",
+        "votes": 11
+      }
     }
   },
   "GET /api/users": {
