@@ -19,5 +19,5 @@ exports.patchArticleVotes = (req, res, next) => {
     const vote = req.body.inc_votes
     return Promise.all([fetchArticleById(article_id), updateArticleVotes(article_id, vote)])
     .then(([articleNo, article]) => res.status(200).send({article}))
-    .catch(err => (next({...err, context: 'article'})))
+    .catch(err => next({...err, context: 'article'}))
 }

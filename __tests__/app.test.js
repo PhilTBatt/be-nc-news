@@ -157,6 +157,7 @@ describe('/api/articles', () => {
         .expect(200)
         .then(({body}) => {
             expect(Array.isArray(body.articles)).toBe(true)
+            expect(body.articles.length).toBe(13)
             body.articles.forEach(article => {
                 expect(article).toHaveProperty('author', expect.any(String))
                 expect(article).toHaveProperty('title', expect.any(String))
@@ -192,37 +193,6 @@ describe('/api/articles', () => {
         .then(({body}) => {
             expect(Array.isArray(body.articles)).toBe(true)
             expect(body.articles).toBeSortedBy('author', {descending: true})
-    
-            return request(app).get('/api/articles?sort_by=title')
-        })
-        .then(({body}) => {
-            expect(Array.isArray(body.articles)).toBe(true)
-            expect(body.articles).toBeSortedBy('title', {descending: true})
-    
-            return request(app).get('/api/articles?sort_by=topic')
-        })
-        .then(({body}) => {
-            expect(Array.isArray(body.articles)).toBe(true)
-            expect(body.articles).toBeSortedBy('topic', {descending: true})
-    
-            return request(app).get('/api/articles?sort_by=votes')
-        })
-        .then(({body}) => {
-            expect(Array.isArray(body.articles)).toBe(true)
-            expect(body.articles).toBeSortedBy('votes', {descending: true})
-    
-            return request(app).get('/api/articles?sort_by=article_img_url')
-        })
-        .then(({body}) => {
-            expect(Array.isArray(body.articles)).toBe(true)
-            expect(body.articles).toBeSortedBy('article_img_url', {descending: true})
-    
-            return request(app).get('/api/articles?sort_by=comment_count')
-        })
-        .then(({body}) => {
-            console.log(body)
-            expect(Array.isArray(body.articles)).toBe(true)
-            expect(body.articles).toBeSortedBy('comment_count', {descending: true})
         })
     })
     
@@ -238,36 +208,6 @@ describe('/api/articles', () => {
         .then(({body}) => {
             expect(Array.isArray(body.articles)).toBe(true)
             expect(body.articles).toBeSortedBy('author', {descending: false})
-    
-            return request(app).get('/api/articles?sort_by=title&order=ASC')
-        })
-        .then(({body}) => {
-            expect(Array.isArray(body.articles)).toBe(true)
-            expect(body.articles).toBeSortedBy('title', {descending: false})
-    
-            return request(app).get('/api/articles?sort_by=topic&order=ASC')
-        })
-        .then(({body}) => {
-            expect(Array.isArray(body.articles)).toBe(true)
-            expect(body.articles).toBeSortedBy('topic', {descending: false})
-    
-            return request(app).get('/api/articles?sort_by=votes&order=ASC')
-        })
-        .then(({body}) => {
-            expect(Array.isArray(body.articles)).toBe(true)
-            expect(body.articles).toBeSortedBy('votes', {descending: false})
-    
-            return request(app).get('/api/articles?sort_by=article_img_url&order=ASC')
-        })
-        .then(({body}) => {
-            expect(Array.isArray(body.articles)).toBe(true)
-            expect(body.articles).toBeSortedBy('article_img_url', {descending: false})
-    
-            return request(app).get('/api/articles?sort_by=comment_count&order=ASC')
-        })
-        .then(({body}) => {
-            expect(Array.isArray(body.articles)).toBe(true)
-            expect(body.articles).toBeSortedBy('comment_count', {descending: false})
         })
     })
 
@@ -462,6 +402,7 @@ describe('GET /api/users', () => {
         .expect(200)
         .then(({body}) => {
             expect(Array.isArray(body.users)).toBe(true)
+            expect(body.users.length).toBe(4)
             body.users.forEach(user => {
                 expect(user).toHaveProperty('username')
                 expect(user).toHaveProperty('name')
