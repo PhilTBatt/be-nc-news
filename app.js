@@ -1,29 +1,11 @@
 const express = require('express')
-const { getTopics } = require('./controllers/topics.controller')
-const { getEndpoints } = require('./controllers/api.controller')
-const { getArticleById, getArticles, patchArticleVotes } = require('./controllers/articles.controller')
-const { getArticleComments, postArticleComment, deleteComment } = require('./controllers/comments.controller')
-const { getUsers } = require('./controllers/users.controller')
 const app = express()
+
+const apiRouter = require('./routes/api-router')
+
 app.use(express.json())
 
-app.get('/api/topics', getTopics)
-
-app.get('/api', getEndpoints)
-
-app.get('/api/articles/:article_id', getArticleById)
-
-app.get('/api/articles', getArticles)
-
-app.get('/api/articles/:article_id/comments', getArticleComments)
-
-app.get('/api/users', getUsers)
-
-app.post('/api/articles/:article_id/comments', postArticleComment)
-
-app.patch('/api/articles/:article_id', patchArticleVotes)
-
-app.delete('/api/comments/:comment_id', deleteComment)
+app.use('/api', apiRouter)
 
 app.all('/*', (req, res) => {
     res.status(404).send({msg: 'Not found'})
@@ -32,24 +14,19 @@ app.all('/*', (req, res) => {
 app.use((err, req, res, next) => {
     if (err.code === '22P02') {
         res.status(400).send({msg: `Invalid ${err.context}_id`})
-    }
-    else if (err.code === '23502') {
+    } else if (err.code === '23502') {
         res.status(400).send({msg: 'Missing required fields'})
-    }
-    else if (err.code === '23503' && err.constraint === 'comments_author_fkey') {
+    } else if (err.code === '23503' && err.constraint === 'comments_author_fkey') {
         res.status(404).send({msg: 'User not found'})
-    }
-    else if (err.code === '23503' && err.constraint === 'comments_article_id_fkey') {
-        res.status(404).send({msg: `Article not found`})
-    }
-    else if (err.code === '42703') {
+    } else if (err.code === '23503' && err.constraint === 'comments_article_id_fkey') {
+        res.status(404).send({msg: 'Article not found'})
+    } else if (err.code === '42703') {
         res.status(400).send({msg: `Invalid ${err.context}_id`})
-    }
-    else if (err.status && err.msg) {
+    } else if (err.status && err.msg) {
         res.status(err.status).send({msg: err.msg})
+    } else {
+        res.status(500).send({msg: 'Internal Server Error'})
     }
-    else {
-        res.status(500).send({msg: 'Internal Server Error'})}
 })
 
 module.exports = app
