@@ -25,3 +25,20 @@ exports.removeComment = (id) => {
         }}
     )
 }
+
+exports.updateCommentVotes = (id, vote) => {
+    if (!vote) {
+        return Promise.reject({status: 400, msg: 'Missing required fields'})
+    }
+    if (isNaN(vote)) {
+        return Promise.reject({status: 400, msg: 'Invalid vote'})
+    }
+    return db.query('UPDATE comments SET votes = votes + $1 WHERE comment_id = $2 RETURNING *', [vote, id])
+    .then(comment => {
+        if (comment.rows.length === 0) {
+            throw {status: 404, msg: 'Comment not found' }
+        }
+
+        return comment.rows[0]
+    })
+}
