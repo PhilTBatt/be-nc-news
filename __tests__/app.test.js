@@ -65,6 +65,14 @@ describe('GET /api/articles/:article_id', () => {
             expect(article).toHaveProperty('article_img_url', expect.any(String))
         })
     })
+    it('GET: 200 - should return the correct comment_count for the article', () => {
+        return request(app)
+        .get('/api/articles/1')
+        .expect(200)
+        .then(({body: {article}}) => {
+            expect(article.comment_count).toBe(11)
+        })
+    })
 
     it('GET: 400 - should return an error for an invalid article_id', () => {
         return request(app)
