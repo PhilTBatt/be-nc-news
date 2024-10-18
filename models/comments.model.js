@@ -1,7 +1,9 @@
 const db = require('../db/connection')
 
-exports.fetchArticleComments = (id) => {
-    return db.query('SELECT * FROM comments WHERE article_id = $1 ORDER BY created_at DESC', [id])
+exports.fetchArticleComments = (id, limit = 10, page = 1) => {
+    if (isNaN(limit)) return Promise.reject({status: 400, msg: 'Invalid limit query'})
+    if (isNaN(page)) return Promise.reject({status: 400, msg: 'Invalid page query'})
+    return db.query('SELECT * FROM comments WHERE article_id = $1 ORDER BY created_at DESC LIMIT $2 OFFSET $3', [id, limit, (page - 1) * limit])
     .then((comments) => comments.rows)
 }
 
@@ -12,6 +14,7 @@ exports.insertArticleComment = (id, comment) => {
     if (typeof comment.username !== 'string' || typeof comment.body !== 'string' || commentObjKeys.length !== validKeys.length ||!commentObjKeys.every(key => validKeys.includes(key))) {
         return Promise.reject({status: 400, msg: 'Missing required fields'})
     }
+
     return db.query('INSERT INTO comments (body, votes, author, article_id) VALUES ($1, $2, $3, $4) RETURNING *',
         [comment.body, 0, comment.username, id])
     .then(comments => comments.rows[0])

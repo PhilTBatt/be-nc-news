@@ -377,7 +377,7 @@ describe('GET /api/articles/:article_id/comments', () => {
         .expect(200)
         .then(({body: {comments}}) => {
             expect(comments).toBeInstanceOf(Array)
-            expect(comments.length).toBe(11)
+            expect(comments.length).toBe(10)
             comments.forEach(comment => {
                 expect(comment).toHaveProperty('comment_id')
                 expect(comment).toHaveProperty('votes')
@@ -404,6 +404,58 @@ describe('GET /api/articles/:article_id/comments', () => {
         .expect(200)
         .then(({body: {comments}}) => {
             expect(comments).toBeSortedBy('created_at', {descending: true})
+        })
+    })
+
+    it('GET: 200 - should respond with comments limited to the default of 10 when no limit is specified', () => {
+        return request(app)
+        .get('/api/articles/1/comments')
+        .expect(200)
+        .then(({body: {comments}}) => {
+            expect(comments[0]).toEqual({"article_id": 1, "author": "icellusedkars", "body": "I hate streaming noses", 
+                "comment_id": 5, "created_at": "2020-11-03T21:00:00.000Z", "votes": 0})
+            expect(comments).toBeInstanceOf(Array)
+            expect(comments.length).toBe(10)
+        })
+    })
+
+    it('GET: 200 - should return the correct number of comments based on the limit', () => {
+        return request(app)
+        .get('/api/articles/1/comments?limit=5')
+        .expect(200)
+        .then(({body: {comments}}) => {
+            expect(comments[0]).toEqual({"article_id": 1, "author": "icellusedkars", "body": "I hate streaming noses", 
+                "comment_id": 5, "created_at": "2020-11-03T21:00:00.000Z", "votes": 0})
+            expect(comments).toBeInstanceOf(Array)
+            expect(comments.length).toBe(5)
+        })
+    })
+
+    it('GET: 200 - should return comments from the correct page when page is provided', () => {
+        return request(app)
+        .get('/api/articles/1/comments?limit=5&p=2')
+        .expect(200)
+        .then(({body: {comments}}) => {
+            expect(comments).toBeInstanceOf(Array)
+            expect(comments.length).toBe(5)
+        })
+    })
+
+    it('GET: 400 - should return an error for an invalid limit query', () => {
+        return request(app)
+        .get('/api/articles/1/comments?limit=invalid_limit')
+        .expect(400)
+        .then(({body}) => {
+            expect(body).toEqual({msg: 'Invalid limit query'})
+        })
+    })
+
+    it('GET: 400 - should return an error for an invalid page query', () => {
+        return request(app)
+        .get('/api/articles/1/comments?p=invalid_page')
+        .expect(400)
+        .then(({body}) => {
+            expect(body).toEqual({msg: 'Invalid page query'})
         })
     })
 
