@@ -4,7 +4,8 @@ const { fetchArticleComments, insertArticleComment, removeComment, updateComment
 
 exports.getArticleComments = (req, res, next) => {
     const {article_id} = req.params
-    return Promise.all([fetchArticleById(article_id), fetchArticleComments(article_id)])
+    const {limit, p} = req.query
+    return Promise.all([fetchArticleById(article_id), fetchArticleComments(article_id, limit, p)])
     .then(([article, comments]) => res.status(200).send({comments}))
     .catch(next)
 }
