@@ -250,6 +250,57 @@ describe('/api/articles', () => {
     })
 })
 
+describe('POST /api/articles', () => {
+    it('POST: 201 - should add a new article and respond with the newly added article', () => {
+        const newArticle = {author: 'butter_bridge', title: 'New Article Title',  body: 'This is the body of the new article.', topic: 'mitch',  article_img_url: 'https://example.com/image.jpg'}
+        return request(app)
+        .post('/api/articles')
+        .send(newArticle)
+        .expect(201)
+        .then(({body: {article}}) => {
+            expect(article).toHaveProperty('article_id')
+            expect(article).toHaveProperty('author', 'butter_bridge')
+            expect(article).toHaveProperty('title', 'New Article Title')
+            expect(article).toHaveProperty('body', 'This is the body of the new article.')
+            expect(article).toHaveProperty('topic', 'mitch')
+            expect(article).toHaveProperty('article_img_url', 'https://example.com/image.jpg')
+            expect(article).toHaveProperty('votes', 0)
+            expect(article).toHaveProperty('created_at')
+            expect(article).toHaveProperty('comment_count', 0)
+        })
+    })
+
+    it('POST: 201 - should add a new article with a default article_img_url if not provided', () => {
+        const newArticle = {author: 'butter_bridge', title: 'New Article Without Image', body: 'This is the body of the new article without an image.', topic: 'mitch'}
+        return request(app)
+        .post('/api/articles')
+        .send(newArticle)
+        .expect(201)
+        .then(({body: {article}}) => {
+            expect(article).toHaveProperty('article_id')
+            expect(article).toHaveProperty('author', 'butter_bridge')
+            expect(article).toHaveProperty('title', 'New Article Without Image')
+            expect(article).toHaveProperty('body', 'This is the body of the new article without an image.')
+            expect(article).toHaveProperty('topic', 'mitch')
+            expect(article).toHaveProperty('article_img_url')
+            expect(article).toHaveProperty('votes', 0)
+            expect(article).toHaveProperty('created_at')
+            expect(article).toHaveProperty('comment_count', 0)
+        })
+    })
+
+    it('POST: 400 - should return an error when required fields are missing', () => {
+        const incompleteArticle = {title: 'Incomplete Article'}
+        return request(app)
+        .post('/api/articles')
+        .send(incompleteArticle)
+        .expect(400)
+        .then(({body}) => {
+            expect(body).toEqual({msg: 'Missing required fields'})
+        })
+    })
+})
+
 describe('GET /api/articles/:article_id/comments', () => {
     it('GET: 200 - should return an array of comments for the given article_id', () => {
         return request(app)

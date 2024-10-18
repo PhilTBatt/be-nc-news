@@ -49,3 +49,10 @@ exports.updateArticleVotes = (id, vote) => {
     return db.query('UPDATE articles SET votes = votes + $1 WHERE article_id = $2 RETURNING *', [vote, id])
     .then(article => article.rows[0])
 }
+
+exports.insertArticle = (article) => {
+    const {author, title, body, topic, article_img_url} = article
+    return db.query('INSERT INTO articles (author, title, body, topic, article_img_url, votes) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *, 0 AS comment_count', 
+        [author, title, body, topic, article_img_url || 'placeholder.img', 0])
+    .then(article => article.rows[0])
+}
