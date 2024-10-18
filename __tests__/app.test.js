@@ -156,7 +156,6 @@ describe('/api/articles', () => {
         .expect(200)
         .then(({body: {articles}}) => {
             expect(Array.isArray(articles)).toBe(true)
-            expect(articles.length).toBe(13)
             articles.forEach(article => {
                 expect(article).toHaveProperty('author', expect.any(String))
                 expect(article).toHaveProperty('title', expect.any(String))
@@ -219,6 +218,76 @@ describe('/api/articles', () => {
             articles.forEach(article => {
                 expect(article.topic).toBe('mitch')
             })
+        })
+    })
+
+    it('GET: 200 - should respond with articles limited to the default of 10 when no limit is specified', () => {
+        return request(app)
+        .get('/api/articles')
+        .expect(200)
+        .then(({body: {articles, total_count}}) => {
+            expect(Array.isArray(articles)).toBe(true)
+            expect(articles).toHaveLength(10)
+            expect(total_count).toBe(13)
+        })
+    })
+    
+    it('GET: 200 - should limit the number of responses based on the limit query', () => {
+        return request(app)
+        .get('/api/articles?limit=5')
+        .expect(200)
+        .then(({body: {articles, total_count}}) => {
+            expect(Array.isArray(articles)).toBe(true)
+            expect(articles).toHaveLength(5)
+            expect(total_count).toBe(13)
+        })
+    })
+    
+    it('GET: 200 - should respond with articles from the correct page with the correct page length', () => {
+        return request(app)
+        .get('/api/articles?limit=5&p=2')
+        .expect(200)
+        .then(({body: {articles, total_count}}) => {
+            expect(articles[0]).toEqual({"article_id": 5, "article_img_url": "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700", 
+                "author": "rogersop", "comment_count": 2, "created_at": "2020-08-03T13:14:00.000Z", "title": "UNCOVERED: catspiracy to bring down democracy", "topic": "cats", "votes": 0})
+            expect(Array.isArray(articles)).toBe(true)
+            expect(articles).toHaveLength(5)
+            expect(total_count).toBe(13)
+        })
+    })
+
+    it('GET: 200 - should respond with articles from the correct page with the correct page length whilst being sorted, ordered and filtered', () => {
+        return request(app)
+        .get('/api/articles?sort_by=article_id&order=ASC&topic=mitch&limit=5&p=2')
+        .expect(200)
+        .then(({body: {articles, total_count}}) => {
+            expect(articles[0]).toEqual({"article_id": 7, "article_img_url": "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700", 
+                "author": "icellusedkars", "comment_count": 0, "created_at": "2020-01-07T14:08:00.000Z", "title": "Z", "topic": "mitch", "votes": 0})
+            expect(Array.isArray(articles)).toBe(true)
+            expect(articles).toBeSortedBy('article_id', {descending: false})
+            expect(articles).toHaveLength(5)
+            expect(total_count).toBe(12)
+            articles.forEach(article => {
+                expect(article.topic).toBe('mitch')
+            })
+        })
+    })
+    
+    it('GET: 400 - should return an error when an invalid limit is provided', () => {
+        return request(app)
+        .get('/api/articles?limit=invalid')
+        .expect(400)
+        .then(({body}) => {
+            expect(body.msg).toBe('Invalid limit query')
+        })
+    })
+    
+    it('GET: 400 - should return an error when an invalid page is provided', () => {
+        return request(app)
+        .get('/api/articles?p=invalid')
+        .expect(400)
+        .then(({body}) => {
+            expect(body.msg).toBe('Invalid page query')
         })
     })
 
