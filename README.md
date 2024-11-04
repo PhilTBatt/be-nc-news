@@ -11,7 +11,7 @@ This project is a a RESTful API for a news article platform that allows users to
 ### To run this project locally:
 
 1. Open your terminal and run the following command to clone the repository to your local machine:
-git clone https://github.com/PhilTBatt/nc-news
+git clone https://github.com/PhilTBatt/be-nc-news
 
 2. Navigate into the cloned repository adn run the following command to install the required dependencies:
 npm install
