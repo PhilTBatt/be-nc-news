@@ -1,6 +1,6 @@
 # Northcoders News API
 
-[Live API]((https://be-nc-news-oovq.onrender.com))
+[Live API](https://be-nc-news-oovq.onrender.com)
 
 This project is a a RESTful API for a news article platform that allows users to view articles, leave comments, and interact with the content in various ways. It is built using Node.js, Express, and PostgreSQL.
 
