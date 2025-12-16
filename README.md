@@ -13,7 +13,7 @@ This project is a a RESTful API for a news article platform that allows users to
 1. Open your terminal and run the following command to clone the repository to your local machine:
 `git clone https://github.com/PhilTBatt/be-nc-news`
 
-2. Navigate into the cloned repository adn run the following command to install the required dependencies:
+2. Navigate into the cloned repository and run the following command to install the required dependencies:
 `npm install`
 
 3. Create a file named `.env.development` and add the following line:
